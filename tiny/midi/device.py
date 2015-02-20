@@ -1,3 +1,5 @@
+import traceback
+
 import mido
 
 from .chain import MidiChain
@@ -9,8 +11,12 @@ class MidiInput:
         self.chains = []
 
     def on_message(self, message):
-        for chain in self.chains:
-            chain.run(message)
+        for chain in self.chains[:]:
+            try:
+                chain.run(message)
+            except Exception as e:
+                traceback.print_exc()
+                self.chains.remove(chain)
 
     def __rshift__(self, other):
         if callable(other):
@@ -19,13 +25,4 @@ class MidiInput:
             self.chains.append(chain)
             return chain
         return NotImplemented
-
-if __name__ == "__main__":
-    from .processors import cc, value, printer
-
-    beatstep = MidiInput("Arturia BeatStep MIDI 1")
-    beatstep >> value() >> printer()
-    beatstep >> printer()
-    while 1:
-        pass
 
