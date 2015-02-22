@@ -10,11 +10,13 @@ class Tick(unit.Unit):
     def count(self):
         return self.left.count() + self.right.count()
 
+    def count_units(self):
+        return self.left.count_units() + self.right.count_units()
+
     def acquire(self, expression_id, unit_id):
-        if isinstance(self.left, unit.Unit):
-            self.left.acquire(expression_id, unit_id)
-        if isinstance(self.right, unit.Unit):
-            self.right.acquire(expression_id, unit_id + 1)
+        self.left.acquire(expression_id, unit_id)
+        unit_id += self.left.count_units()
+        self.right.acquire(expression_id, unit_id)
 
     def expression(self, byte_code):
         self.left.expression(byte_code)

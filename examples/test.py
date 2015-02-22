@@ -3,16 +3,18 @@ from tiny.units import SineAr, Dac
 from tiny.parameter import Parameter
 
 expression = SineAr(channels=2) >> Dac() >> server
-"""
-del expression
 
 sine = SineAr(channels=2)
 dac = Dac(channels=2)
 
 expression = sine >> dac >> server
 220 >> sine.frequency
-del expression
 
+beatstep >> value() >> sine.frequency
+
+beatstep >> control() == 120 >> value()
+
+"""
 sine_a = Sine(2)
 sine_b = Sine(2)
 bus = Bus(2)
@@ -21,7 +23,7 @@ dac = Dac(2)
 sine_a >> bus
 sine_b >> bus
 bus >> dac
-del bus
+
 
 bind = ([220, 440, 560] >> sine.frequency |
         1 >> scheduler)

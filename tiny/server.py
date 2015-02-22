@@ -4,14 +4,17 @@ import socket
 from .unit import Unit
 from .expression import Expression
 from .parameter import Parameter
+from .opcode import ControlOpcode
 
 class Server:
     def __init__(self, host="127.0.0.1", port=42753):
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
     def send(self, byte_code):
-        packed = bytes() 
+        print(byte_code)
+        packed = bytes()
         for opcode in byte_code:
             if isinstance(opcode, int):
                 packed = packed + struct.pack(">I", opcode)
@@ -19,6 +22,9 @@ class Server:
                 packed = packed + struct.pack(">f", opcode)
         self.socket.sendto(packed, (self.host, self.port))
 
+    def add_edge(self, to, from_):
+        byte_code = [ControlOpcode.add_edge, to, from_]
+        self.send(byte_code)
 
     def _tick_in_unit(self, unit):
         expression = Expression(unit)

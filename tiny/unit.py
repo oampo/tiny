@@ -1,3 +1,4 @@
+import numbers
 from inspect import Parameter, Signature
 
 from . import opcode
@@ -15,6 +16,9 @@ class Unit:
         self.expression_id = None
 
     def count(self):
+        return 1
+
+    def count_units(self):
         return 1
 
     def acquire(self, expression_id, unit_id):
@@ -41,10 +45,30 @@ class Unit:
         return tick.Tick(unit, self)
 
     def _add_unit(self, unit):
+        from .operator import Operator
         if self.output_channels != unit.output_channels:
             raise errors.ChannelMismatchError(self.output_channels,
                                               unit.input_channels)
-        return Operator(self, other, opcode.DspOpcode.add)
+        return Operator(self, unit, opcode.DspOpcode.add)
+
+    def _multiply_unit(self, unit):
+        from .operator import Operator
+        if self.output_channels != unit.output_channels:
+            raise errors.ChannelMismatchError(self.output_channels,
+                                              unit.input_channels)
+        return Operator(self, unit, opcode.DspOpcode.multiply)
+
+    def _add_number(self, number):
+        from .units import ParameterAr
+        from .operator import Operator
+        parameter = ParameterAr(number, channels=self.output_channels)
+        return Operator(self, parameter, opcode.DspOpcode.add)
+
+    def _multiply_number(self, number):
+        from .units import ParameterAr
+        from .operator import Operator
+        parameter = ParameterAr(number, channels=self.output_channels)
+        return Operator(self, parameter, opcode.DspOpcode.multiply)
 
     def __rrshift__(self, other):
         if isinstance(other, Unit):
@@ -54,5 +78,14 @@ class Unit:
     def __add__(self, other):
         if isinstance(other, Unit):
             return self._add_unit(other)
+        elif isinstance(other, numbers.Number):
+            return self._add_number(other)
+        return NotImplemented
+
+    def __mul__(self, other):
+        if isinstance(other, Unit):
+            return self._multiply_unit(other)
+        elif isinstance(other, numbers.Number):
+            return self._multiply_number(other)
         return NotImplemented
 

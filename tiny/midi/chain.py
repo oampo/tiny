@@ -16,8 +16,8 @@ class MidiChain:
         return self
 
     def _chain_parameter(self, parameter):
-        from .processors import set_parameter
-        self.chain.append(set_parameter(parameter))
+        from .processors import SetParameter
+        self.chain.append(SetParameter(parameter))
 
     def __rshift__(self, other):
         if callable(other):

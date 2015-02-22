@@ -2,6 +2,7 @@ import numbers
 
 from . import opcode
 from . import unit
+from . import tick
 
 class Parameter:
     def __init__(self, value=0):
@@ -9,9 +10,10 @@ class Parameter:
         self.unit_id = None
         self.id = None
         self.value = value
+        self.input_channels = 1
+        self.output_channels = 0
 
     def acquire(self, expression_id, unit_id, parameter_id):
-        print(expression_id, unit_id, parameter_id)
         self.expression_id = expression_id
         self.unit_id = unit_id
         self.id = parameter_id
@@ -25,9 +27,14 @@ class Parameter:
                       self.unit_id, self.id, float(self.value)]
 
     def _tick_in_unit(self, unit):
-        if other.output_channels != 1:
+        from . import server
+        from .units import ParameterWriterAr
+        if unit.output_channels != 1:
             raise ChannelMismatchError()
-        return tick.Tick(other, self)
+        writer = ParameterWriterAr(self.expression_id, self.unit_id, self.id)
+        expression = tick.Tick(unit, writer) >> server.server
+        server.server.add_edge(expression.id, self.expression_id)
+        return expression
 
     def _tick_in_number(self, number):
         from . import server
