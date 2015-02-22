@@ -1,11 +1,9 @@
 class Filter:
-    def __init__(self, attribute, types, operator, value):
+    def __init__(self, attribute, operator, value):
         self.attribute = attribute
-        self.types = types
         self.operator = operator
         self.value = value
 
     def __call__(self, message):
-        if (message.type in self.types and
-            self.operator(getattr(message, self.attribute), self.value)):
+        if self.operator(self.attribute(message), self.value):
             return message
