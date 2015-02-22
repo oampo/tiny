@@ -1,5 +1,4 @@
 from ..parameter import Parameter
-from .processors import set_parameter
 
 class MidiChain:
     def __init__(self):
@@ -14,15 +13,15 @@ class MidiChain:
 
     def _chain_callable(self, callable):
         self.chain.append(callable)
+        return self
 
     def _chain_parameter(self, parameter):
+        from .processors import set_parameter
         self.chain.append(set_parameter(parameter))
-
 
     def __rshift__(self, other):
         if callable(other):
             return self._chain_callable(other)
         elif isinstance(other, Parameter):
             return self._chain_parameter(other)
-
         return NotImplemented

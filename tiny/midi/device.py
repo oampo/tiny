@@ -26,3 +26,12 @@ class MidiInput:
             return chain
         return NotImplemented
 
+if __name__ == "__main__":
+    from .processors import *
+
+    beatstep = MidiInput("Arturia BeatStep MIDI 1")
+    beatstep >> polytouch() >> (value() > 85) >> value() >> (lambda m: print(m))
+
+
+    while 1:
+        pass
