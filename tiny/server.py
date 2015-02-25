@@ -6,6 +6,7 @@ from .expression import Expression
 from .parameter import Parameter
 from .opcode import ControlOpcode
 
+
 class Server:
     def __init__(self, host="127.0.0.1", port=42753):
         self.host = host
@@ -35,7 +36,7 @@ class Server:
 
     def _tick_in_parameter(self, parameter):
         # Don't send message for unbound parameters
-        if parameter.expression_id == None:
+        if parameter.expression_id is None:
             return
         byte_code = []
         parameter.set_parameter(byte_code)

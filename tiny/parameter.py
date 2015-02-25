@@ -1,9 +1,12 @@
 import numbers
+import collections
 
 from . import opcode
 from . import unit
 from . import tick
 from .rate import Rate
+from .errors import ChannelMismatchError
+
 
 class Parameter:
     def __init__(self, value=0):
@@ -57,4 +60,3 @@ class Parameter:
         elif isinstance(other, collections.Iterable):
             pass
         return NotImplemented
-

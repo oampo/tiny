@@ -1,5 +1,6 @@
 from ..parameter import Parameter
 
+
 class MidiChain:
     def __init__(self):
         self.chain = []

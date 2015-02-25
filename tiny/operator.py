@@ -1,5 +1,5 @@
 from .unit import Unit
-from .rate import Rate
+
 
 class Operator(Unit):
     def __init__(self, left, right, operator, rate):

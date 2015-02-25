@@ -1,7 +1,9 @@
 from . import opcode
 
+
 class Expression:
     id = 0
+
     def __init__(self, unit):
         self.id = Expression.id
         Expression.id += 1
@@ -16,4 +18,3 @@ class Expression:
 
     def __del__(self):
         pass
-

@@ -1,11 +1,11 @@
 import os.path
 import json
-from inspect import Parameter, Signature
 
 import inflection
 
 from . import util
 from . import magic_unit
+
 
 with open(os.path.expanduser("~/.config/art/art_info.json")) as f:
     info = json.load(f)
@@ -42,11 +42,12 @@ for type_id, unit in enumerate(info["units"]):
                               dict(__signature__=signature,
                                    definition=unit))
 
+
 class Adc(BusInAr):
     def __init__(self, channels=info["input_channels"]):
         super(Adc, self).__init__(channels=channels, bus_id=0.0)
 
+
 class Dac(BusOutAr):
     def __init__(self, channels=info["output_channels"]):
         super(Dac, self).__init__(channels=channels, bus_id=1.0)
-

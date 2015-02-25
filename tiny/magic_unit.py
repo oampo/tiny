@@ -3,14 +3,15 @@ from . import unit
 from .parameter import Parameter
 from .rate import Rate
 
+
 class MagicUnit(unit.Unit):
     __signature__ = util.make_signature([])
 
     def __init__(self, *args, **kwargs):
         bound = self.__signature__.bind(*args, **kwargs)
         for parameter in self.__signature__.parameters.values():
-            if (parameter.name not in bound.arguments
-                 and parameter.default is not parameter.empty):
+            if (parameter.name not in bound.arguments and
+                    parameter.default is not parameter.empty):
                 bound.arguments[parameter.name] = parameter.default
 
         if self.definition["input_rate"] == "Control":
@@ -42,5 +43,3 @@ class MagicUnit(unit.Unit):
             parameter = Parameter(value)
             self.parameters.append(parameter)
             setattr(self, definition["name"], parameter)
-
-

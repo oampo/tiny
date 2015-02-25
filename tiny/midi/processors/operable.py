@@ -1,5 +1,6 @@
 import operator
 
+
 class Operable:
     def __add__(self, other):
         from .operator import BinaryOperator
@@ -64,4 +65,3 @@ class Operable:
     def __neg__(self):
         from .operator import UnaryOperator
         return UnaryOperator(self, operator.neg)
-

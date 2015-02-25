@@ -2,6 +2,7 @@ import operator
 
 from .filter import Filter
 
+
 class Filterable:
     def __lt__(self, other):
         return Filter(self, operator.lt, other)
@@ -20,4 +21,3 @@ class Filterable:
 
     def __gt__(self, other):
         return Filter(self, operator.gt, other)
-

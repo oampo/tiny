@@ -1,9 +1,9 @@
 import numbers
-from inspect import Parameter, Signature
 
 from .opcode import DspOpcode
 from .errors import ChannelMismatchError
 from .rate import Rate
+
 
 class Unit:
     definition = {
@@ -43,8 +43,8 @@ class Unit:
     def _tick_in_unit(self, unit):
         from . import tick
         if self.input_channels != unit.output_channels:
-            raise errors.ChannelMismatchError(self.input_channels,
-                                              unit.output_channels)
+            raise ChannelMismatchError(self.input_channels,
+                                       unit.output_channels)
         return tick.Tick(unit, self)
 
     def _operate_unit(self, unit, opcode):
@@ -89,4 +89,3 @@ class Unit:
         elif isinstance(other, numbers.Number):
             return self._operate_number(other, DspOpcode.multiply)
         return NotImplemented
-
