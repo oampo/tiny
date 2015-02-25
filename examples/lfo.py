@@ -1,14 +1,14 @@
 from tiny.server import server
-from tiny.units import SineAr, Dac, ParameterAr
+from tiny.units import SineAr, SineKr, Dac, ParameterKr
 from tiny.midi.device import MidiInput
 from tiny.midi.processors import *
 
 sine = SineAr(channels=2)
 expression = sine >> Dac() >> server
 
-depth = ParameterAr(110)
-frequency = ParameterAr(220)
-lfo = SineAr(2)
+depth = ParameterKr(110)
+frequency = ParameterKr(220)
+lfo = SineKr(2)
 (lfo * depth + frequency) >> sine.frequency
 
 beatstep = MidiInput("Arturia BeatStep MIDI 1")

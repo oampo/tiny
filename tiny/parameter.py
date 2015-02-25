@@ -3,6 +3,7 @@ import numbers
 from . import opcode
 from . import unit
 from . import tick
+from .rate import Rate
 
 class Parameter:
     def __init__(self, value=0):
@@ -28,10 +29,18 @@ class Parameter:
 
     def _tick_in_unit(self, unit):
         from . import server
-        from .units import ParameterWriterAr
+        from .units import ParameterWriterAr, ParameterWriterKr
         if unit.output_channels != 1:
             raise ChannelMismatchError()
-        writer = ParameterWriterAr(self.expression_id, self.unit_id, self.id)
+
+        if unit.output_rate == Rate.audio:
+            writer = ParameterWriterAr(self.expression_id, self.unit_id,
+                                       self.id)
+        elif unit.output_rate == Rate.control:
+            writer = ParameterWriterKr(self.expression_id, self.unit_id,
+                                       self.id)
+        print(unit.output_rate)
+
         expression = tick.Tick(unit, writer) >> server.server
         server.server.add_edge(expression.id, self.expression_id)
         return expression

@@ -2,7 +2,8 @@ from . import unit
 
 class Tick(unit.Unit):
     def __init__(self, left, right):
-        super(Tick, self).__init__(0, right.output_channels)
+        super(Tick, self).__init__(0, right.output_channels, left.input_rate,
+                                   right.output_rate)
 
         self.left = left
         self.right = right

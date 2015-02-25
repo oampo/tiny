@@ -2,9 +2,8 @@ from .unit import Unit
 from .rate import Rate
 
 class Operator(Unit):
-    def __init__(self, left, right, operator):
-        super(Operator, self).__init__(0, right.output_channels)
-
+    def __init__(self, left, right, operator, rate):
+        super(Operator, self).__init__(0, right.output_channels, rate, rate)
         self.left = left
         self.right = right
         self.operator = operator
@@ -23,7 +22,7 @@ class Operator(Unit):
     def expression(self, byte_code):
         self.left.expression(byte_code)
         self.right.expression(byte_code)
-        byte_code += [self.operator, self.output_channels, Rate.audio]
+        byte_code += [self.operator, self.output_channels, self.output_rate]
 
     def set_parameters(self, byte_code):
         self.left.set_parameters(byte_code)

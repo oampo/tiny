@@ -1,17 +1,20 @@
 import numbers
 from inspect import Parameter, Signature
 
-from . import opcode
-from . import errors
-from . import util
+from .opcode import DspOpcode
+from .errors import ChannelMismatchError
+from .rate import Rate
 
 class Unit:
     definition = {
     }
 
-    def __init__(self, input_channels, output_channels):
+    def __init__(self, input_channels, output_channels, input_rate,
+                 output_rate):
         self.input_channels = input_channels
         self.output_channels = output_channels
+        self.input_rate = input_rate
+        self.output_rate = output_rate
         self.parameters = []
         self.expression_id = None
 
@@ -29,7 +32,7 @@ class Unit:
             parameter.acquire(expression_id, unit_id, parameter_id)
 
     def expression(self, byte_code):
-        byte_code += [opcode.DspOpcode.unit, self.id,
+        byte_code += [DspOpcode.unit, self.id,
                       self.definition["type_id"], self.input_channels,
                       self.output_channels]
 
@@ -44,31 +47,29 @@ class Unit:
                                               unit.output_channels)
         return tick.Tick(unit, self)
 
-    def _add_unit(self, unit):
+    def _operate_unit(self, unit, opcode):
         from .operator import Operator
         if self.output_channels != unit.output_channels:
-            raise errors.ChannelMismatchError(self.output_channels,
-                                              unit.input_channels)
-        return Operator(self, unit, opcode.DspOpcode.add)
+            raise ChannelMismatchError(self.output_channels,
+                                       unit.input_channels)
 
-    def _multiply_unit(self, unit):
-        from .operator import Operator
-        if self.output_channels != unit.output_channels:
-            raise errors.ChannelMismatchError(self.output_channels,
-                                              unit.input_channels)
-        return Operator(self, unit, opcode.DspOpcode.multiply)
+        if (self.output_rate == Rate.control and
+                unit.output_rate == Rate.audio):
+            return Operator(self >> KrToAr(), unit, opcode, Rate.audio)
+        elif (self.output_rate == Rate.audio and
+                unit.output_rate == Rate.control):
+            return Operator(self, unit >> KrToAr(), opcode, Rate.audio)
+        else:
+            return Operator(self, unit, opcode, self.output_rate)
 
-    def _add_number(self, number):
-        from .units import ParameterAr
+    def _operate_number(self, number, opcode):
+        from .units import ParameterAr, ParameterKr
         from .operator import Operator
-        parameter = ParameterAr(number, channels=self.output_channels)
-        return Operator(self, parameter, opcode.DspOpcode.add)
-
-    def _multiply_number(self, number):
-        from .units import ParameterAr
-        from .operator import Operator
-        parameter = ParameterAr(number, channels=self.output_channels)
-        return Operator(self, parameter, opcode.DspOpcode.multiply)
+        if self.definition.rate == Rate.audio:
+            parameter = ParameterAr(number, channels=self.output_channels)
+        elif self.definition.rate == Rate.control:
+            parameter = ParameterKr(number, channels=self.output_channels)
+        return Operator(self, parameter, opcode)
 
     def __rrshift__(self, other):
         if isinstance(other, Unit):
@@ -77,15 +78,15 @@ class Unit:
 
     def __add__(self, other):
         if isinstance(other, Unit):
-            return self._add_unit(other)
+            return self._operate_unit(other, DspOpcode.add)
         elif isinstance(other, numbers.Number):
-            return self._add_number(other)
+            return self._operate_number(other, DspOpcode.add)
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Unit):
-            return self._multiply_unit(other)
+            return self._operate_unit(other, DspOpcode.multiply)
         elif isinstance(other, numbers.Number):
-            return self._multiply_number(other)
+            return self._operate_number(other, DspOpcode.multiply)
         return NotImplemented
 
