@@ -39,7 +39,6 @@ class Parameter:
         elif unit.output_rate == Rate.control:
             writer = ParameterWriterKr(self.expression_id, self.unit_id,
                                        self.id)
-        print(unit.output_rate)
 
         expression = tick.Tick(unit, writer) >> server.server
         server.server.add_edge(expression.id, self.expression_id)
