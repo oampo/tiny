@@ -4,6 +4,7 @@ from tiny.midi.device import MidiInput
 from tiny.midi.processors import *
 
 sine = SineAr(channels=2)
+
 expression = sine >> Dac() >> server
 
 depth = ParameterKr(110)

@@ -11,12 +11,18 @@ class Unit:
 
     def __init__(self, input_channels, output_channels, input_rate,
                  output_rate):
+        self.expression_id = None
+        self.id = None
+
+        self.realized = False
+
         self.input_channels = input_channels
         self.output_channels = output_channels
+
         self.input_rate = input_rate
         self.output_rate = output_rate
+
         self.parameters = []
-        self.expression_id = None
 
     def count(self):
         return 1
@@ -24,12 +30,21 @@ class Unit:
     def count_units(self):
         return 1
 
-    def acquire(self, expression_id, unit_id):
+    def realize(self, expression_id, unit_id):
         self.expression_id = expression_id
         self.id = unit_id
+        self.realized = True
 
         for parameter_id, parameter in enumerate(self.parameters):
-            parameter.acquire(expression_id, unit_id, parameter_id)
+            parameter.realize(expression_id, unit_id, parameter_id)
+
+    def unrealize(self):
+        self.expression_id = None
+        self.id = None
+        self.realized = True
+
+        for parameter in self.parameters:
+            parameter.unrealize()
 
     def expression(self, byte_code):
         byte_code += [DspOpcode.unit, self.id,

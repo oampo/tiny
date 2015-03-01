@@ -23,10 +23,6 @@ class Server:
                 packed = packed + struct.pack(">f", opcode)
         self.socket.sendto(packed, (self.host, self.port))
 
-    def add_edge(self, to, from_):
-        byte_code = [ControlOpcode.add_edge, to, from_]
-        self.send(byte_code)
-
     def _tick_in_unit(self, unit):
         expression = Expression(unit)
         byte_code = []
@@ -35,9 +31,6 @@ class Server:
         return expression
 
     def _tick_in_parameter(self, parameter):
-        # Don't send message for unbound parameters
-        if parameter.expression_id is None:
-            return
         byte_code = []
         parameter.set_parameter(byte_code)
         self.send(byte_code)

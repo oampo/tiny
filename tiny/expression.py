@@ -8,7 +8,7 @@ class Expression:
         self.id = Expression.id
         Expression.id += 1
         self.unit = unit
-        self.unit.acquire(self.id, 0)
+        self.unit.realize(self.id, 0)
 
     def expression(self, byte_code):
         byte_code += [opcode.ControlOpcode.add_expression, self.id,
@@ -16,5 +16,5 @@ class Expression:
         self.unit.expression(byte_code)
         self.unit.set_parameters(byte_code)
 
-    def __del__(self):
+    def remove(self):
         pass
