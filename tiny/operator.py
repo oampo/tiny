@@ -4,26 +4,33 @@ from .unit import Unit
 class Operator(Unit):
     def __init__(self, left, right, operator, rate):
         super(Operator, self).__init__(0, right.output_channels, rate, rate)
-        self.left = left
-        self.right = right
-        self.operator = operator
+        self._left = left
+        self._right = right
+        self._operator = operator
 
     def count(self):
-        return self.left.count() + self.right.count() + 1
+        return self._left.count() + self._right.count() + 1
 
     def count_units(self):
-        return self.left.count_units() + self.right.count_units()
+        return self._left.count_units() + self._right.count_units()
 
     def realize(self, expression_id, unit_id):
-        self.left.realize(expression_id, unit_id)
-        unit_id += self.left.count_units()
-        self.right.realize(expression_id, unit_id)
+        self._left.realize(expression_id, unit_id)
+        unit_id += self._left.count_units()
+        self._right.realize(expression_id, unit_id)
 
     def expression(self, byte_code):
-        self.left.expression(byte_code)
-        self.right.expression(byte_code)
-        byte_code += [self.operator, self.output_channels, self.output_rate]
+        self._left.expression(byte_code)
+        self._right.expression(byte_code)
+        byte_code += [self._operator, self.output_channels, self.output_rate]
 
     def set_parameters(self, byte_code):
-        self.left.set_parameters(byte_code)
-        self.right.set_parameters(byte_code)
+        self._left.set_parameters(byte_code)
+        self._right.set_parameters(byte_code)
+
+    def __getattr__(self):
+        try:
+            return getattr(self._left, attribute)
+        except AttributeError:
+            return getattr(self._right, attribute)
+

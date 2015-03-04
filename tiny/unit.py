@@ -3,6 +3,7 @@ import numbers
 from .opcode import DspOpcode
 from .errors import ChannelMismatchError
 from .rate import Rate
+from .parameter_proxy import ParameterProxy
 
 
 class Unit:
@@ -80,11 +81,30 @@ class Unit:
     def _operate_number(self, number, opcode):
         from .units import ParameterAr, ParameterKr
         from .operator import Operator
-        if self.definition.rate == Rate.audio:
+        if self.output_rate == Rate.audio:
             parameter = ParameterAr(number, channels=self.output_channels)
-        elif self.definition.rate == Rate.control:
+        elif self.output_rate == Rate.control:
             parameter = ParameterKr(number, channels=self.output_channels)
-        return Operator(self, parameter, opcode)
+        return Operator(self, parameter, opcode, self.output_rate)
+
+    def _operate_proxy(self, proxy, opcode):
+        from .units import ParameterAr, ParameterKr
+        from .operator import Operator
+        if self.output_rate == Rate.audio:
+            parameter = ParameterAr(proxy.value, channels=self.output_channels)
+        elif self.output_rate == Rate.control:
+            parameter = ParameterKr(proxy.value, channels=self.output_channels)
+        proxy.parameters.append(parameter.value)
+        return Operator(self, parameter, opcode, self.output_rate)
+
+    def _operate(self, other, operator):
+        if isinstance(other, Unit):
+            return self._operate_unit(other, DspOpcode.add)
+        elif isinstance(other, numbers.Number):
+            return self._operate_number(other, DspOpcode.add)
+        elif isinstance(other, ParameterProxy):
+            return self._operate_proxy(other, DspOpcode.add)
+        return NotImplemented
 
     def __rrshift__(self, other):
         if isinstance(other, Unit):
@@ -92,15 +112,7 @@ class Unit:
         return NotImplemented
 
     def __add__(self, other):
-        if isinstance(other, Unit):
-            return self._operate_unit(other, DspOpcode.add)
-        elif isinstance(other, numbers.Number):
-            return self._operate_number(other, DspOpcode.add)
-        return NotImplemented
+        return self._operate(other, DspOpcode.add)
 
     def __mul__(self, other):
-        if isinstance(other, Unit):
-            return self._operate_unit(other, DspOpcode.multiply)
-        elif isinstance(other, numbers.Number):
-            return self._operate_number(other, DspOpcode.multiply)
-        return NotImplemented
+        return self._operate(other, DspOpcode.multiply)

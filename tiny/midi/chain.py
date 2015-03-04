@@ -1,4 +1,5 @@
 from ..parameter import Parameter
+from ..parameter_proxy import ParameterProxy
 
 
 class MidiChain:
@@ -24,5 +25,7 @@ class MidiChain:
         if callable(other):
             return self._chain_callable(other)
         elif isinstance(other, Parameter):
+            return self._chain_parameter(other)
+        elif isinstance(other, ParameterProxy):
             return self._chain_parameter(other)
         return NotImplemented
