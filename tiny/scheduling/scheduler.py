@@ -1,7 +1,9 @@
 import time
-import threading
+import asyncio
 import functools
 from heapq import heappush, heappop
+
+from .pattern import as_pattern
 
 class Scheduler:
     def __init__(self, bpm=120):
@@ -17,7 +19,7 @@ class Scheduler:
         self._last_beat_time = self._time
         self._beat_length = 60 / bpm
 
-        self._timer = None
+        self._future = None
 
     def add(self, time, callback):
         self._add(time, {"callback": callback})
@@ -43,6 +45,7 @@ class Scheduler:
         self.add(time, callback)
 
     def play(self, patterns, callback):
+        patterns = {key: as_pattern(value)() for key, value in patterns.items()}
         self._update_time()
         self._add(self.time, {"patterns": patterns,
                               "callback": callback})
@@ -89,15 +92,22 @@ class Scheduler:
         self._set_timer()
 
     def _set_timer(self):
-        if self._timer != None:
-            self._timer.cancel()
+        if self._future != None:
+            self._future.cancel()
 
         if not len(self._queue):
             return
 
-        self._timer = threading.Timer(self._queue[0][0] - time.time(),
-                                      self._process_events)
-        self._timer.start()
+        self._future = asyncio.async(self._run(self._queue[0][0]))
+
+    @asyncio.coroutine
+    def _run(self, time):
+        # Uses wait strategy from threading wait
+        delay = 0.0005
+        while self.time < time:
+            delay = min(delay * 2, time - self._time, 0.05)
+            yield from asyncio.sleep(delay)
+        self._process_events()
 
     def _process_event(self, event):
         if "patterns" in event:
@@ -138,9 +148,10 @@ class Scheduler:
         return NotImplemented
 
 if __name__ == "__main__":
+    from .. import main
+
     scheduler = Scheduler()
-    scheduler.play(dict(x=iter([1, 2, 3] * 8), duration=iter([1] * 10)),
+    scheduler.play(dict(x=[1, 2, 3], duration=1),
                    lambda x: print(x))
 
-    while True:
-        time.sleep(1)
+    main()
