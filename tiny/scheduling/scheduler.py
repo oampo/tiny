@@ -3,7 +3,7 @@ import asyncio
 import functools
 from heapq import heappush, heappop
 
-from .pattern import as_pattern
+from .patterns import p_dict
 
 class Scheduler:
     def __init__(self, bpm=120):
@@ -21,8 +21,8 @@ class Scheduler:
 
         self._future = None
 
-    def add(self, time, callback):
-        self._add(time, {"callback": callback})
+    def add(self, time, callback, **patterns):
+        self._add(time, {"callback": callback, "patterns": p_dict(patterns)()})
 
     def _add(self, time, data):
         event = (time, data)
@@ -31,24 +31,24 @@ class Scheduler:
         if self._queue[0] is event:
             self._set_timer()
 
-    def add_relative(self, beats, callback):
+    def add_relative(self, beats, callback, **patterns):
         self._update_time()
-        self.add(self._time + beats * self._beat_length, callback)
+        self.add(self._time + beats * self._beat_length, callback, **patterns)
 
-    def add_absolute(self, beat, callback):
+    def add_absolute(self, beat, callback, **patterns):
         self._update_time()
 
         time = self._last_beat_time + (beat - self._beat) * self._beat_length
 
         if time < self._time:
             return
-        self.add(time, callback)
+        self.add(time, callback, **patterns)
 
-    def play(self, patterns, callback):
-        patterns = {key: as_pattern(value)() for key, value in patterns.items()}
+    def play(self, callback, **patterns):
         self._update_time()
-        self._add(self.time, {"patterns": patterns,
-                              "callback": callback})
+        process_dict = functools.partial(self._process_dict,
+                                         callback=callback)
+        self.add(self.time, process_dict, **patterns)
 
     @property
     def time(self):
@@ -110,27 +110,21 @@ class Scheduler:
         self._process_events()
 
     def _process_event(self, event):
-        if "patterns" in event:
-            patterns = event["patterns"]
-            duration = patterns["duration"]
-            values = {}
-            for key, pattern in patterns.items():
-                if key == "duration":
-                    continue
-                try:
-                    values[key] = next(pattern)
-                except StopIteration:
-                    return
-            event["callback"](**values)
+        patterns = event["patterns"]
+        try:
+            values = next(patterns)
+        except StopIteration:
+            return
+        duration = event["callback"](**values)
 
-            try:
-                duration = next(duration)
-            except StopIteration:
-                return
-            self._add(event["time"] + duration * self._beat_length,
-                      {"callback": event["callback"], "patterns": patterns})
-        else:
-            event["callback"]()
+        if duration:
+            time = event.pop("time")
+            self._add(time + duration * self._beat_length, event)
+
+    def _process_dict(self, callback, **values):
+        duration = values.pop("duration")
+        callback(**values)
+        return duration
 
     # Should maybe be part of expression/unit
     def _set_parameters(self, expression, **kwargs):
@@ -140,7 +134,9 @@ class Scheduler:
     def _tick_in_dict(self, dict):
         if "expression" in dict:
             expression = dict.pop("expression")
-            self.play(dict, functools.partial(self._set_parameters, expression))
+            set_parameters = functools.partial(self._set_parameters,
+                                               expression)
+            self.play(set_parameters, **dict)
 
     def __rrshift__(self, other):
         if hasattr(other, "__getitem__"):
@@ -149,9 +145,9 @@ class Scheduler:
 
 if __name__ == "__main__":
     from .. import main
+    from .patterns import p_iterable
 
     scheduler = Scheduler()
-    scheduler.play(dict(x=[1, 2, 3], duration=1),
-                   lambda x: print(x))
+    scheduler.play(lambda x: print(x), x=p_iterable([1, 2, 3]) * 2, duration=1)
 
     main()
