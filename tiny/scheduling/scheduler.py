@@ -6,6 +6,8 @@ from heapq import heappush, heappop
 from .patterns import p_dict
 
 class Scheduler:
+    duration = "duration"
+
     def __init__(self, bpm=120):
         self._queue = []
 
@@ -45,7 +47,6 @@ class Scheduler:
         self.add(time, callback, **patterns)
 
     def play(self, callback, **patterns):
-        self._update_time()
         process_dict = functools.partial(self._process_dict,
                                          callback=callback)
         self.add(self.time, process_dict, **patterns)
@@ -122,21 +123,26 @@ class Scheduler:
             self._add(time + duration * self._beat_length, event)
 
     def _process_dict(self, callback, **values):
-        duration = values.pop("duration")
-        callback(**values)
-        return duration
+        duration = values.pop(self.duration)
+        if not callback(**values):
+            return duration
 
     # Should maybe be part of expression/unit
-    def _set_parameters(self, expression, **kwargs):
-        for key, value in kwargs.items():
-            value >> getattr(expression, key)
+    def _set_parameters(self, patterns):
+        try:
+            values = next(patterns)
+        except StopIteration:
+            return True
+        for parameter, value in values.items():
+            value >> parameter
 
     def _tick_in_dict(self, dict):
-        if "expression" in dict:
-            expression = dict.pop("expression")
-            set_parameters = functools.partial(self._set_parameters,
-                                               expression)
-            self.play(set_parameters, **dict)
+        duration = dict.pop(self.duration)
+        dict = {
+            self.duration: duration,
+            "patterns": p_dict(dict)()
+        }
+        self.play(self._set_parameters, **dict)
 
     def __rrshift__(self, other):
         if hasattr(other, "__getitem__"):

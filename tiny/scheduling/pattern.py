@@ -38,14 +38,14 @@ def pattern(generator):
         return Pattern(generator, *args, **kwargs)
     return inner
 
-def repeated_pattern(default_limit=None):
+def repeated_pattern(limit=None):
     from .patterns import p_repeat
     def middle(function):
         signature = inspect.signature(function)
         parameters = list(signature.parameters.values())
         limit_parameter = inspect.Parameter("limit",
                 kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                default=default_limit)
+                default=limit)
         parameters.append(limit_parameter)
         signature = signature.replace(parameters=parameters)
         function = pattern(function)
