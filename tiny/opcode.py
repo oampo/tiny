@@ -5,11 +5,12 @@ import enum
 class ControlOpcode(enum.IntEnum):
     set_parameter = 0
     add_expression = 1
-    add_edge = 2
+    remove_expression = 2
+    add_edge = 3
 
 
 @enum.unique
 class DspOpcode(enum.IntEnum):
-    unit = 3
-    add = 4
-    multiply = 5
+    unit = 4
+    add = 5
+    multiply = 6
