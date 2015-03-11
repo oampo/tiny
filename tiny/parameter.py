@@ -65,11 +65,13 @@ class Parameter:
 
     def _tick_in_unit(self, unit):
         from .server import server
+        was_controlled = self.controlled
+
         self._controller = unit
         self.controlled = True
 
         if self.realized:
-            if self.controlled:
+            if was_controlled:
                 self._controller_expression.remove()
                 self._controller_expression = None
             byte_code = []
@@ -80,11 +82,13 @@ class Parameter:
         from .server import server
         self.value = number
 
+        was_controlled = self.controlled
+
         self._controller = None
         self.controlled = False
 
         if self.realized:
-            if self.controlled:
+            if was_controlled:
                 self._controller_expression.remove()
                 self._controller_expression = None
 
