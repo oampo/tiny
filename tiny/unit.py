@@ -99,11 +99,11 @@ class Unit:
 
     def _operate(self, other, operator):
         if isinstance(other, Unit):
-            return self._operate_unit(other, DspOpcode.add)
+            return self._operate_unit(other, operator)
         elif isinstance(other, numbers.Number):
-            return self._operate_number(other, DspOpcode.add)
+            return self._operate_number(other, operator)
         elif isinstance(other, ParameterProxy):
-            return self._operate_proxy(other, DspOpcode.add)
+            return self._operate_proxy(other, operator)
         return NotImplemented
 
     def __rrshift__(self, other):
