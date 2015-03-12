@@ -15,6 +15,7 @@ class MidiInput:
 
     @asyncio.coroutine
     def _run(self):
+        loop = asyncio.get_event_loop()
         while True:
             future = loop.run_in_executor(None, self.port.receive)
             message = yield from future

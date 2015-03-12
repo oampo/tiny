@@ -11,7 +11,7 @@ from .parameter_proxy import ParameterProxy
 
 
 class Parameter:
-    def __init__(self, value=0):
+    def __init__(self, value=None):
         self.expression_id = None
         self.unit_id = None
         self.id = None
@@ -25,8 +25,9 @@ class Parameter:
         self._controller = None
         self._controller_expression = None
 
-        self.value = 0
-        value >> self
+        self.value = None
+        if value is not None:
+            value >> self
 
     def realize(self, expression_id, unit_id, parameter_id):
         self.expression_id = expression_id
@@ -43,8 +44,9 @@ class Parameter:
         self.realized = False
 
     def set_parameter(self, byte_code):
-        byte_code += [ControlOpcode.set_parameter, self.expression_id,
-                      self.unit_id, self.id, float(self.value)]
+        if self.value is not None:
+            byte_code += [ControlOpcode.set_parameter, self.expression_id,
+                          self.unit_id, self.id, float(self.value)]
         if self.controlled:
             self._run_controller(byte_code)
 
@@ -96,7 +98,8 @@ class Parameter:
 
     def _tick_in_proxy(self, proxy):
         proxy.parameters.append(self)
-        proxy.value >> self
+        if proxy.value:
+            proxy.value >> self
 
     def __rrshift__(self, other):
         if isinstance(other, unit.Unit):

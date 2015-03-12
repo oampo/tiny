@@ -51,8 +51,8 @@ def repeated_pattern(limit=None):
         function = pattern(function)
         def inner(*args, **kwargs):
             bound = signature.bind(*args, **kwargs)
-            limit = bound.arguments.pop("limit", default_limit)
-            return p_repeat(function(**bound.arguments), limit)
+            lim = bound.arguments.pop("limit", limit)
+            return p_repeat(function(**bound.arguments), lim)
         return inner
     return middle
 

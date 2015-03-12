@@ -11,12 +11,14 @@ def make_signature(parameters):
 def unit(function):
     function_signature = signature(function)
     def inner(*args, **kwargs):
-        bound = function_signature.bind(*args, **kwargs)
+        bound = function_signature.bind_partial(*args, **kwargs)
         for parameter in function_signature.parameters.values():
             if parameter.name in bound.arguments:
                 value = bound.arguments[parameter.name]
             elif parameter.default is not parameter.empty:
                 value = parameter.default
+            else:
+                value = None
             bound.arguments[parameter.name] = ParameterProxy(value)
 
         unit = function(*bound.args, **bound.kwargs)

@@ -65,6 +65,7 @@ class Unit:
 
     def _operate_unit(self, unit, opcode):
         from .operator import Operator
+        from .units import KrToAr
         if self.output_channels != unit.output_channels:
             raise ChannelMismatchError(self.output_channels,
                                        unit.input_channels)

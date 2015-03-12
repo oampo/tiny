@@ -14,6 +14,8 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send(self, byte_code):
+        if not len(byte_code):
+            return
         print(byte_code)
         packed = bytes()
         for opcode in byte_code:

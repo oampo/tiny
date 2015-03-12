@@ -28,7 +28,7 @@ class Operator(Unit):
         self._left.set_parameters(byte_code)
         self._right.set_parameters(byte_code)
 
-    def __getattr__(self):
+    def __getattr__(self, attribute):
         try:
             return getattr(self._left, attribute)
         except AttributeError:
