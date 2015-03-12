@@ -2,6 +2,7 @@ import asyncio
 import code
 import sys
 
+
 class Repl(code.InteractiveConsole):
     def __init__(self, loop=None, *args, **kwargs):
         super(Repl, self).__init__(*args, **kwargs)
@@ -40,6 +41,7 @@ class Repl(code.InteractiveConsole):
         more = self.push(line)
         self.prompt(more)
 
+
 if __name__ == "__main__":
     from . import main
 
@@ -47,6 +49,3 @@ if __name__ == "__main__":
     r.interact()
 
     main()
-
-
-

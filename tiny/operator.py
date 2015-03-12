@@ -33,4 +33,3 @@ class Operator(Unit):
             return getattr(self._left, attribute)
         except AttributeError:
             return getattr(self._right, attribute)
-

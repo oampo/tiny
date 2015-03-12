@@ -1,5 +1,4 @@
 import operator
-import numbers
 import inspect
 
 
@@ -33,28 +32,35 @@ class Pattern:
     def __rmul__(self, other):
         return self._roperate(other, operator.mul)
 
+
 def pattern(generator):
     def inner(*args, **kwargs):
         return Pattern(generator, *args, **kwargs)
     return inner
 
+
 def repeated_pattern(limit=None):
     from .patterns import p_repeat
+
     def middle(function):
         signature = inspect.signature(function)
         parameters = list(signature.parameters.values())
-        limit_parameter = inspect.Parameter("limit",
-                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                default=limit)
+        limit_parameter = inspect.Parameter(
+            "limit",
+            kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            default=limit
+        )
         parameters.append(limit_parameter)
         signature = signature.replace(parameters=parameters)
         function = pattern(function)
+
         def inner(*args, **kwargs):
             bound = signature.bind(*args, **kwargs)
             lim = bound.arguments.pop("limit", limit)
             return p_repeat(function(**bound.arguments), lim)
         return inner
     return middle
+
 
 def as_pattern(value):
     from .patterns import p_value

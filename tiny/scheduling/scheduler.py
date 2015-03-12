@@ -5,6 +5,7 @@ from heapq import heappush, heappop
 
 from .patterns import p_dict
 
+
 class Scheduler:
     duration = "duration"
 
@@ -93,7 +94,7 @@ class Scheduler:
         self._set_timer()
 
     def _set_timer(self):
-        if self._future != None:
+        if self._future is not None:
             self._future.cancel()
 
         if not len(self._queue):

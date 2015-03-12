@@ -1,5 +1,6 @@
 from .opcode import ControlOpcode
 
+
 class Expression:
     id = 0
 

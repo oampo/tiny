@@ -1,5 +1,6 @@
 import operator
 
+
 class ParameterProxy:
     def __init__(self, value=0):
         self.parameters = []
@@ -21,6 +22,7 @@ class ParameterProxy:
         self.operator = ParameterOperator(self.operator, other, operator.mul)
         return self
 
+
 class ParameterOperator:
     def __init__(self, child, other, operator):
         self.child = child
@@ -31,4 +33,3 @@ class ParameterOperator:
         if self.child is not None:
             value = self.child(value)
         return self.operator(value, self.other)
-

@@ -4,7 +4,6 @@ import socket
 from .unit import Unit
 from .expression import Expression
 from .parameter import Parameter
-from .opcode import ControlOpcode
 
 
 class Server:

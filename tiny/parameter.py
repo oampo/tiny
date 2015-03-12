@@ -2,8 +2,6 @@ import numbers
 import collections
 
 from . import unit
-from . import tick
-from .errors import ChannelMismatchError
 from .rate import Rate
 from .opcode import ControlOpcode
 from .expression import Expression

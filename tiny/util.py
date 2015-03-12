@@ -1,6 +1,7 @@
 from inspect import Parameter, Signature, signature
 from .parameter_proxy import ParameterProxy
 
+
 def make_signature(parameters):
     return Signature(
         Parameter(
@@ -8,8 +9,10 @@ def make_signature(parameters):
         ) for parameter in parameters
     )
 
+
 def unit(function):
     function_signature = signature(function)
+
     def inner(*args, **kwargs):
         bound = function_signature.bind_partial(*args, **kwargs)
         for parameter in function_signature.parameters.values():
@@ -27,4 +30,3 @@ def unit(function):
             setattr(unit, name, value)
         return unit
     return inner
-
