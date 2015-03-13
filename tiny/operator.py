@@ -30,6 +30,6 @@ class Operator(Unit):
 
     def __getattr__(self, attribute):
         try:
-            return getattr(self._left, attribute)
+            return getattr(object.__getattribute__(self, "_left"), attribute)
         except AttributeError:
-            return getattr(self._right, attribute)
+            return getattr(object.__getattribute__(self, "_right"), attribute)

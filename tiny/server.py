@@ -1,5 +1,6 @@
 import struct
 import socket
+import copy
 
 from .unit import Unit
 from .expression import Expression
@@ -25,7 +26,7 @@ class Server:
         self.socket.sendto(packed, (self.host, self.port))
 
     def _tick_in_unit(self, unit):
-        expression = Expression(unit)
+        expression = Expression(copy.deepcopy(unit))
         byte_code = []
         expression.expression(byte_code)
         self.send(byte_code)
